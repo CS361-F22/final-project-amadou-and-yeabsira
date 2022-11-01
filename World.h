@@ -76,11 +76,11 @@ int count;
   }
 };
 
- int getDemeIndex(int x, int y){
+//  int getDemeIndex(int x, int y){
     
-    for(int i = 0;i<6;i++){
+//     for(int i = 0;i<6;i++){
 
-    }
- }
+//     }
+//  }
 
 #endif
