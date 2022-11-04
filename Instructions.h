@@ -14,10 +14,10 @@ struct IOInstruction {
   static void run(sgpl::Core<Spec> &core, const sgpl::Instruction<Spec> &inst,
                   const sgpl::Program<Spec> &,
                   typename Spec::peripheral_t &state) noexcept {
-    float output = core.registers[inst.args[0]];
+    uint32_t output = core.registers[inst.args[0]];
     state.world->CheckOutput(output, state);
 
-    float input = (float)sgpl::tlrand.Get().GetDouble();
+    uint32_t input = sgpl::tlrand.Get().GetUInt();
     core.registers[inst.args[0]] = input;
     state.add_input(input);
   }
