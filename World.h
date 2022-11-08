@@ -11,11 +11,13 @@ class OrgWorld : public emp::World<Organism> {
   std::vector<Task *> tasks{new Task_1(),new Task_2(),new Task_3(),new Task_4(),new Task_5()};
   std::vector<std::string> task_name;
   int task_index;
+ 
   
   
 
 public:
-int count;
+ float reward;
+ int count;
   OrgWorld(emp::Random &_random) : emp::World<Organism>(_random), random(_random) { }
 
   ~OrgWorld() {}
@@ -53,7 +55,7 @@ int count;
   void CheckOutput(float output, OrgState &state) {
     task_index = 0;
     for (Task *task : tasks) {
-     output = task->CheckOutput(output, state.last_inputs);
+     output = task->CheckOutput(output, state.last_inputs, reward);
      state.points += output;
      if(output!=0){
        std::cout << task->name();
@@ -67,6 +69,9 @@ int count;
   std::string GetTask(int i){
     return task_name[i];
   }
+  void resetTask(int i){
+    task_name[i] = "";
+  }
   void ReproduceOrg(emp::WorldPosition location) {
     // Wait until after all organisms have been processed to perform
     // reproduction. If reproduction happened immediately then the child could
@@ -74,13 +79,22 @@ int count;
     // organism
     reproduce_queue.push_back(location);
   }
+
+
+  int getDemeIndex(int x, int y){
+    std::vector<std::vector<int>> cells;
+    cells.resize(100, std::vector<int>(100, 0));
+    for(int m = 0;m<10;m++){
+      for(int k = 0;k<10;k++){
+        for(int i = 0;i<6;i++){
+          for(int j = 0;j<6;j++){
+            cells[i+(6*m)][(j+(6*k))] = k+1;
+          }
+        }
+      }
+    }
+    return cells[x][y];
+ }
 };
-
-//  int getDemeIndex(int x, int y){
-    
-//     for(int i = 0;i<6;i++){
-
-//     }
-//  }
 
 #endif

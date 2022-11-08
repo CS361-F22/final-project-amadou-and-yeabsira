@@ -1,5 +1,5 @@
 
-// in web.cpp at the VERY top
+//in web.cpp at the VERY top
 #define UIT_VENDORIZE_EMP
 #define UIT_SUPPRESS_MACRO_INSEEP_WARNINGS
 #include "emp/math/Random.hpp"
@@ -12,14 +12,15 @@
 #include "emp/web/UrlParams.hpp"
 #include "ConfigPanel.h"
 
+
 MyConfigType config;
 emp::web::Document doc{"target"};
 emp::web::Document settings("settings");
 
-class Animator : public emp::web::Animate
-{
-    const int num_h_boxes = 50;
-    const int num_w_boxes = 50;
+
+class Animator : public emp::web::Animate {
+    const int num_h_boxes = 60;
+    const int num_w_boxes = 60;
     const double RECT_SIDE = 10;
     const double width{num_w_boxes * RECT_SIDE};
     const double height{num_h_boxes * RECT_SIDE};
@@ -29,60 +30,66 @@ class Animator : public emp::web::Animate
     OrgWorld world{random};
 
 public:
-    // Constructor for the class that sets up the Gui for the animation
-    Animator()
-    {
 
+
+//Constructor for the class that sets up the Gui for the animation
+Animator() {    
+        
+        
         auto specs = emp::ArgManager::make_builtin_specs(&config);
         emp::ArgManager am(emp::web::GetUrlParams(), specs);
         am.UseCallbacks();
-        if (am.HasUnused())
-            std::exit(EXIT_FAILURE);
+        if (am.HasUnused()) std::exit(EXIT_FAILURE);
         emp::prefab::ConfigPanel config_panel(config);
-        config_panel.SetRange("Population", "1", "25");
+        config_panel.SetRange("Population", "1", "100");
         settings << config_panel;
+
         doc << canvas;
         doc << GetToggleButton("Toggle");
         doc << GetStepButton("Step");
+
         random.ResetSeed(config.SEED());
+        world.reward = config.Reward();
         world.SetPopStruct_Grid(num_w_boxes, num_h_boxes);
-        for (int i = 0; i < config.Population(); i++)
-        {
-            Organism *new_org1 = new Organism(&world, 1);
-            world.Inject(*new_org1);
+        for(int i = 0;i<config.Population();i++){
+         Organism* new_org1 = new Organism(&world, 1);
+         world.Inject(*new_org1);
         }
 
         world.Resize(num_w_boxes, num_h_boxes);
-    }
 
-    void DoFrame() override
-    {
+
+        
+}
+
+
+void DoFrame() override {
         canvas.Clear();
         world.Update();
         int org_num = 0;
-        for (int x = 0; x < num_w_boxes; x++)
-        {
-            for (int y = 0; y < num_h_boxes; y++)
-            {
-                if (world.IsOccupied(org_num))
-                {
-                    std::cout << "occupied"<<std::endl;
-                    Organism organism = world.GetOrg(org_num);
+        for (int x = 0; x < num_w_boxes; x++){
+            for (int y = 0; y < num_h_boxes; y++) {
+                if (world.IsOccupied(org_num)) {
+                    Organism organism = world.GetOrg(org_num); 
                     canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "black", "black");
-                    
                 }
-                else{
-                    canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "white", "black");
+                else {
+                    canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, emp::ColorRGB(0, 0, world.getDemeIndex(x,y)*10), "black");
                 }
                 org_num++;
             }
         }
     }
+    
 };
 
 Animator animator;
 
-int main()
-{
+int main() {
     animator.Step();
 }
+
+
+
+
+

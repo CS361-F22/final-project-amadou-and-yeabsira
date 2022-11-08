@@ -12,7 +12,7 @@ struct OrgState {
   bool solved;
 
   //Array for tracking the four most recent input values
-  uint32_t last_inputs[4];
+  float last_inputs[4];
   //Index of the most recent input value in array
   size_t last_input_idx;
   //How many points this organism has currently
@@ -24,7 +24,7 @@ struct OrgState {
   /**
   * Adds an input number to the tracker
   */
-  void add_input(uint32_t input) {
+  void add_input(float input) {
     last_inputs[last_input_idx] = input;
     last_input_idx = (last_input_idx + 1) % 4;
   }
