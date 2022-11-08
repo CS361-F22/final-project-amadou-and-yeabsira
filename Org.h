@@ -4,9 +4,13 @@
 #include "CPU.h"
 #include "OrgState.h"
 #include "emp/Evolve/World_structure.hpp"
+#include <iostream>
+#include <list>
 
 class Organism {
   CPU cpu;
+  int Seq_ID = 5;
+  std::list<std::string> inbox = {};
 
 public:
   Organism(OrgWorld *world, double points = 0.0) : cpu(world) {
@@ -49,6 +53,21 @@ public:
     cpu.PrintGenome();
     std::cout << "end ---------------" << std::endl;
   }
+
+  int GetSeqId(){
+    return Seq_ID;
+  }
+  void SetSeqID(int Id){
+    Seq_ID = Id;
+  }
+  void SendMsg(std::string msg, Organism organism){
+    organism.RecMsg(msg);
+  }
+  void RecMsg(std::string msg){
+    inbox.push_back(msg);
+  }
+
+  
 };
 
 #endif

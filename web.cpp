@@ -11,6 +11,9 @@
 #include "emp/prefab/ConfigPanel.hpp"
 #include "emp/web/UrlParams.hpp"
 #include "ConfigPanel.h"
+#include "emp/games/Othello8.hpp"
+#include <string>
+
 
 
 MyConfigType config;
@@ -19,9 +22,9 @@ emp::web::Document settings("settings");
 
 
 class Animator : public emp::web::Animate {
-    const int num_h_boxes = 60;
-    const int num_w_boxes = 60;
-    const double RECT_SIDE = 10;
+    const double num_h_boxes  = 5;
+    const double num_w_boxes = 5;
+    const double RECT_SIDE = 100;
     const double width{num_w_boxes * RECT_SIDE};
     const double height{num_h_boxes * RECT_SIDE};
 
@@ -29,13 +32,15 @@ class Animator : public emp::web::Animate {
     emp::Random random{config.SEED()};
     OrgWorld world{random};
 
+
+
 public:
 
 
 //Constructor for the class that sets up the Gui for the animation
-Animator() {    
-        
-        
+Animator() {  
+
+       
         auto specs = emp::ArgManager::make_builtin_specs(&config);
         emp::ArgManager am(emp::web::GetUrlParams(), specs);
         am.UseCallbacks();
@@ -57,30 +62,44 @@ Animator() {
         }
 
         world.Resize(num_w_boxes, num_h_boxes);
+        //std::cout << getFacing(5) << std::endl;
 
 
         
 }
 
 
+
+
 void DoFrame() override {
         canvas.Clear();
         world.Update();
         int org_num = 0;
-        for (int x = 0; x < num_w_boxes; x++){
-            for (int y = 0; y < num_h_boxes; y++) {
+        for (int x = 0; x < num_h_boxes;x++ ){
+              for (int y = 0; y < num_w_boxes;y++){
                 if (world.IsOccupied(org_num)) {
                     Organism organism = world.GetOrg(org_num); 
+                    world.processCell(x,y,organism);
                     canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "black", "black");
                 }
                 else {
-                    canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, emp::ColorRGB(0, 0, world.getDemeIndex(x,y)*10), "black");
+                    canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "white", "black");
                 }
                 org_num++;
             }
         }
+        std::cout<< "Leader: " << world.getLeader() << std::endl;
     }
     
+
+ emp::Othello8::Index getFacing(int x, int y){
+    emp::Othello8::Index id;
+    id.Set(x,y);
+    emp::Othello8::Facing f = emp::Othello8::Facing::NE;
+    emp::Othello8* game = new emp::Othello8();
+    return game->GetNeighbor(id,f);
+ }
+
 };
 
 Animator animator;

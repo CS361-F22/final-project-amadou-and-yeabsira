@@ -4,6 +4,7 @@
 #include "emp/Evolve/World.hpp"
 #include "Task.h"
 #include "Org.h"
+#include <stdlib.h>
 
 class OrgWorld : public emp::World<Organism> {
   emp::Random &random;
@@ -11,6 +12,8 @@ class OrgWorld : public emp::World<Organism> {
   std::vector<Task *> tasks{new Task_1(),new Task_2(),new Task_3(),new Task_4(),new Task_5()};
   std::vector<std::string> task_name;
   int task_index;
+  int highestID = 0;
+
  
   
   
@@ -64,6 +67,29 @@ public:
      }
     }
   }
+  struct Cell{
+        int x;
+        int y;
+        int size;
+        int seq_id;
+        int random_id;
+     };
+     
+Cell cell[25];
+
+  void processCell(int x, int y, Organism organism){
+
+    int cell_id = 0;
+
+    cell[cell_id].size = 5 * 5;
+    cell[cell_id].x = x;
+    cell[cell_id].y = y;
+    cell[cell_id].random_id = rand() % 100 + 4000000;
+    cell[cell_id].seq_id = x*y;
+    organism.SetSeqID(cell[cell_id].seq_id);
+    cell_id++;
+    
+  }
 
   //returns the task name of the solved task
   std::string GetTask(int i){
@@ -80,21 +106,34 @@ public:
     reproduce_queue.push_back(location);
   }
 
-
-  int getDemeIndex(int x, int y){
-    std::vector<std::vector<int>> cells;
-    cells.resize(100, std::vector<int>(100, 0));
-    for(int m = 0;m<10;m++){
-      for(int k = 0;k<10;k++){
-        for(int i = 0;i<6;i++){
-          for(int j = 0;j<6;j++){
-            cells[i+(6*m)][(j+(6*k))] = k+1;
-          }
-        }
+  int getLeader(){
+    
+    emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
+    for(int i : schedule) {
+      if(!IsOccupied(i)) {continue;}
+      std::cout << pop[i]->GetSeqId();
+      if(pop[i]->GetSeqId()>highestID){
+        highestID=pop[i]->GetSeqId();
       }
     }
-    return cells[x][y];
- }
+    return highestID;
+  }
+
+
+//   int getDemeIndex(int x, int y){
+//     std::vector<std::vector<int>> cells;
+//     cells.resize(100, std::vector<int>(100, 0));
+//     for(int m = 0;m<10;m++){
+//       for(int k = 0;k<10;k++){
+//         for(int i = 0;i<6;i++){
+//           for(int j = 0;j<6;j++){
+//             cells[i+(6*m)][(j+(6*k))] = k+1;
+//           }
+//         }
+//       }
+//     }
+//     return cells[x][y];
+//  }
 };
 
 #endif
