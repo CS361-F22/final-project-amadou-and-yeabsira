@@ -12,11 +12,13 @@ struct OrgState {
   bool solved;
 
   //Array for tracking the four most recent input values
-  float last_inputs[4];
+  int last_inputs[4];
   //Index of the most recent input value in array
   size_t last_input_idx;
   //How many points this organism has currently
   double points;
+  
+  int Seq_ID;
 
   //Needs to know current location for possible reproduction
   emp::WorldPosition current_location;

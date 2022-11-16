@@ -57,13 +57,12 @@ Animator() {
         world.reward = config.Reward();
         world.SetPopStruct_Grid(num_w_boxes, num_h_boxes);
         for(int i = 0;i<config.Population();i++){
-         Organism* new_org1 = new Organism(&world, 1);
+         Organism* new_org1 = new Organism(&world,i, 1);
          world.Inject(*new_org1);
         }
 
         world.Resize(num_w_boxes, num_h_boxes);
         //std::cout << getFacing(5) << std::endl;
-
 
         
 }
@@ -75,12 +74,19 @@ void DoFrame() override {
         canvas.Clear();
         world.Update();
         int org_num = 0;
+        org_num = 0;
+        
         for (int x = 0; x < num_h_boxes;x++ ){
               for (int y = 0; y < num_w_boxes;y++){
                 if (world.IsOccupied(org_num)) {
-                    Organism organism = world.GetOrg(org_num); 
-                    world.processCell(x,y,organism);
-                    canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "black", "black");
+                    Organism organism = world.GetOrg(org_num);
+                    std::cout << "Ids:" << organism.GetSeqId() << std::endl;
+                    if(organism.GetInbox(0)==6){
+                      canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "black", "black");
+                    }
+                    else{
+                      canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "purple", "black");
+                    }
                 }
                 else {
                     canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "white", "black");
@@ -88,17 +94,11 @@ void DoFrame() override {
                 org_num++;
             }
         }
-        std::cout<< "Leader: " << world.getLeader() << std::endl;
     }
     
 
- emp::Othello8::Index getFacing(int x, int y){
-    emp::Othello8::Index id;
-    id.Set(x,y);
-    emp::Othello8::Facing f = emp::Othello8::Facing::NE;
-    emp::Othello8* game = new emp::Othello8();
-    return game->GetNeighbor(id,f);
- }
+    emp::WorldPosition getFacing(int pos){
+    }
 
 };
 

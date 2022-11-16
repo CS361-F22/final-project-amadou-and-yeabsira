@@ -9,13 +9,12 @@
 class OrgWorld : public emp::World<Organism> {
   emp::Random &random;
   std::vector<emp::WorldPosition> reproduce_queue;
-  std::vector<Task *> tasks{new Task_1(),new Task_2(),new Task_3(),new Task_4(),new Task_5()};
+  std::vector<Task *> tasks{new Task_1()};
   std::vector<std::string> task_name;
   int task_index;
   int highestID = 0;
 
  
-  
   
 
 public:
@@ -57,39 +56,48 @@ public:
   //Check whether the task has been complemted by the organism and assing points based on the result
   void CheckOutput(float output, OrgState &state) {
     task_index = 0;
-    for (Task *task : tasks) {
-     output = task->CheckOutput(output, state.last_inputs, reward);
-     state.points += output;
-     if(output!=0){
-       std::cout << task->name();
-       task_name[task_index] = task->name();
-       task_index++;
-     }
+    for(int i = 0;i<GetSize();i++){
+      for (Task *task : tasks) {
+        emp::Ptr<Organism> currentOrg;
+        int sent = task->CheckOutput(output, state.last_inputs);
+        currentOrg = initiateMsg(i,sent);
+        
+        if(sent==currentOrg->GetSeqId()){
+         state.points += 0.1;
+        }
+        if(sent==currentOrg->GetMaxId()){
+         state.points += 0.2;
+        }
+        if(sent!=currentOrg->GetSeqId()){
+         state.points -= 0.1;
+        }
+      }
     }
   }
-  struct Cell{
-        int x;
-        int y;
-        int size;
-        int seq_id;
-        int random_id;
-     };
-     
-Cell cell[25];
 
-  void processCell(int x, int y, Organism organism){
-
-    int cell_id = 0;
-
-    cell[cell_id].size = 5 * 5;
-    cell[cell_id].x = x;
-    cell[cell_id].y = y;
-    cell[cell_id].random_id = rand() % 100 + 4000000;
-    cell[cell_id].seq_id = x*y;
-    organism.SetSeqID(cell[cell_id].seq_id);
-    cell_id++;
+  emp::Ptr<Organism> initiateMsg(int org, int msg){
+    
+      emp::Ptr<Organism> sender = getOrgByID(org);
+      emp::Ptr<Organism> reciever = getOrgByID(sender->getFacing(org));
+      sender->SendMsg(msg,reciever);
     
   }
+
+  
+
+  emp::Ptr<Organism> getOrgByID(int id){
+    emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
+    for(int i : schedule) {
+      if(!IsOccupied(i)) {continue;}
+      if(pop[i]->GetSeqId()){
+        return pop[i];
+      }
+    }
+    return NULL;
+  }
+
+  
+
 
   //returns the task name of the solved task
   std::string GetTask(int i){
@@ -106,18 +114,6 @@ Cell cell[25];
     reproduce_queue.push_back(location);
   }
 
-  int getLeader(){
-    
-    emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
-    for(int i : schedule) {
-      if(!IsOccupied(i)) {continue;}
-      std::cout << pop[i]->GetSeqId();
-      if(pop[i]->GetSeqId()>highestID){
-        highestID=pop[i]->GetSeqId();
-      }
-    }
-    return highestID;
-  }
 
 
 //   int getDemeIndex(int x, int y){

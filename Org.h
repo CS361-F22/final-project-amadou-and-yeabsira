@@ -8,14 +8,20 @@
 #include <list>
 
 class Organism {
+
   CPU cpu;
-  int Seq_ID = 5;
-  std::list<std::string> inbox = {};
+  std::vector<int> inbox = {};
+  int offspring_id = 20;
 
 public:
-  Organism(OrgWorld *world, double points = 0.0) : cpu(world) {
+  Organism(OrgWorld *world, int _seqID, double points = 0.0) : cpu(world) {
     SetPoints(points);
+    SetSeqID(_seqID);
+    
 
+  }
+  int getFacing(int pos){
+    return 5;
   }
   void SetPoints(double _in) { cpu.state.points = _in; }
   void AddPoints(double _in) { cpu.state.points += _in; }
@@ -31,9 +37,12 @@ public:
   }
 
   std::optional<Organism> CheckReproduction() {
+    
     if (GetPoints() > 20) {
       Organism offspring = *this;
       offspring.Reset();
+      offspring.SetSeqID(offspring_id);
+      offspring_id++;
       offspring.Mutate();
       AddPoints(-20);
       return offspring;
@@ -54,17 +63,26 @@ public:
     std::cout << "end ---------------" << std::endl;
   }
 
+  int GetMaxId(){
+
+  }
+
   int GetSeqId(){
-    return Seq_ID;
+    return cpu.state.Seq_ID;
   }
   void SetSeqID(int Id){
-    Seq_ID = Id;
+    cpu.state.Seq_ID = Id;
   }
-  void SendMsg(std::string msg, Organism organism){
-    organism.RecMsg(msg);
+  void SendMsg(int msg, emp::Ptr<Organism> destination){
+    destination->RecMsg(msg);
+    
   }
-  void RecMsg(std::string msg){
-    inbox.push_back(msg);
+  void RecMsg(int msg){
+    inbox[0] = msg;
+    
+  }
+  int GetInbox(int index){
+   return inbox[index];
   }
 
   
