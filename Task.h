@@ -18,7 +18,7 @@ class Task_1 : public Task {
      public: 
      //returns the name of the task solved
      std::string name() override{
-        std::string n = "Send_Self_ID";
+        std::string n = "Id_Check";
         return n;
      }
 

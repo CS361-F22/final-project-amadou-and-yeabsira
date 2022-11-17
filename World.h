@@ -5,6 +5,7 @@
 #include "Task.h"
 #include "Org.h"
 #include <stdlib.h>
+#include<cstdlib>
 
 class OrgWorld : public emp::World<Organism> {
   emp::Random &random;
@@ -39,6 +40,8 @@ public:
       pop[i]->Process(i);
     }
 
+    SetPosWorld();
+
     //Time to allow reproduction for any organisms that ran the reproduce instruction
     for (emp::WorldPosition location : reproduce_queue) {
       if (!IsOccupied(location)) {
@@ -55,32 +58,48 @@ public:
   }
   //Check whether the task has been complemted by the organism and assing points based on the result
   void CheckOutput(float output, OrgState &state) {
-    task_index = 0;
-    for(int i = 0;i<GetSize();i++){
       for (Task *task : tasks) {
         emp::Ptr<Organism> currentOrg;
-        int sent = task->CheckOutput(output, state.last_inputs);
-        currentOrg = initiateMsg(i,sent);
-        
+        srand(task->CheckOutput(output, state.last_inputs));
+        int sent = rand()%100;
+        currentOrg = initiateMsg(state.Seq_ID, sent);
+        if(!currentOrg){continue;}
+        //std::cout << "Sent: " << sent << " - " << "SeqId: " << currentOrg->GetSeqId() << std::endl;
         if(sent==currentOrg->GetSeqId()){
-         state.points += 0.1;
+          std::cout << "seq_id" << std::endl;
+          state.points += 0.1;
         }
         if(sent==currentOrg->GetMaxId()){
+         //std::cout << "max_id" << std::endl;
          state.points += 0.2;
         }
         if(sent!=currentOrg->GetSeqId()){
+         //std::cout << "non_id" << std::endl;
          state.points -= 0.1;
         }
       }
-    }
   }
 
   emp::Ptr<Organism> initiateMsg(int org, int msg){
     
       emp::Ptr<Organism> sender = getOrgByID(org);
-      emp::Ptr<Organism> reciever = getOrgByID(sender->getFacing(org));
-      sender->SendMsg(msg,reciever);
+      int neighbour  = getFacing(sender->GetPos());
+      if(IsOccupied(neighbour)){
+        emp::Ptr<Organism> reciever = &GetOrg(neighbour);
+        sender->SendMsg(msg,reciever);
+        return sender;
+      }
+      return NULL;
+      
     
+  }
+
+  void SetPosWorld(){
+    emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
+    for(int i : schedule) {
+      if(!IsOccupied(i)) {continue;}
+        pop[i]->SetPos(i);
+    }
   }
 
   
@@ -89,12 +108,31 @@ public:
     emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
     for(int i : schedule) {
       if(!IsOccupied(i)) {continue;}
-      if(pop[i]->GetSeqId()){
+      if(pop[i]->GetSeqId()==id){
+        pop[i]->SetPos(i);
         return pop[i];
       }
     }
     return NULL;
   }
+
+
+  int getFacing(int pos){
+    emp::WorldPosition new_position = GetRandomNeighborPos(pos);
+    return new_position.GetIndex();
+  }
+
+  // Organism getLeader(){
+  //   emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
+  //   for(int i : schedule) {
+  //     if(!IsOccupied(i)) {continue;}
+  //     if(pop[i]->GetSeqId()==id){
+  //       pop[i]->SetPos(i);
+  //       return pop[i];
+  //     }
+  //   }
+  //   return NULL;
+  // }
 
   
 

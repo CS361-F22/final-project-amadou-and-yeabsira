@@ -22,9 +22,9 @@ emp::web::Document settings("settings");
 
 
 class Animator : public emp::web::Animate {
-    const double num_h_boxes  = 5;
-    const double num_w_boxes = 5;
-    const double RECT_SIDE = 100;
+    const double num_h_boxes  = 50;
+    const double num_w_boxes = 50;
+    const double RECT_SIDE = 15;
     const double width{num_w_boxes * RECT_SIDE};
     const double height{num_h_boxes * RECT_SIDE};
 
@@ -80,13 +80,8 @@ void DoFrame() override {
               for (int y = 0; y < num_w_boxes;y++){
                 if (world.IsOccupied(org_num)) {
                     Organism organism = world.GetOrg(org_num);
-                    std::cout << "Ids:" << organism.GetSeqId() << std::endl;
-                    if(organism.GetInbox(0)==6){
-                      canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "black", "black");
-                    }
-                    else{
+                    //std::cout << "Id: " << organism.GetSeqId() << std::endl;
                       canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "purple", "black");
-                    }
                 }
                 else {
                     canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "white", "black");
@@ -94,10 +89,6 @@ void DoFrame() override {
                 org_num++;
             }
         }
-    }
-    
-
-    emp::WorldPosition getFacing(int pos){
     }
 
 };

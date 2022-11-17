@@ -12,6 +12,7 @@ class Organism {
   CPU cpu;
   std::vector<int> inbox = {};
   int offspring_id = 20;
+  int org_pos;
 
 public:
   Organism(OrgWorld *world, int _seqID, double points = 0.0) : cpu(world) {
@@ -20,9 +21,7 @@ public:
     
 
   }
-  int getFacing(int pos){
-    return 5;
-  }
+  
   void SetPoints(double _in) { cpu.state.points = _in; }
   void AddPoints(double _in) { cpu.state.points += _in; }
   double GetPoints() {return cpu.state.points;}
@@ -64,7 +63,13 @@ public:
   }
 
   int GetMaxId(){
-
+    int maxId = 0;
+    for(int i = 0;i<inbox.size();i++){
+      if(inbox[i]>maxId){
+        maxId = inbox[i];
+      }
+    }
+    return maxId;
   }
 
   int GetSeqId(){
@@ -73,12 +78,18 @@ public:
   void SetSeqID(int Id){
     cpu.state.Seq_ID = Id;
   }
+  int GetPos(){
+    return org_pos;
+  }
+  void SetPos(int pos){
+    org_pos = pos;
+  }
   void SendMsg(int msg, emp::Ptr<Organism> destination){
     destination->RecMsg(msg);
     
   }
   void RecMsg(int msg){
-    inbox[0] = msg;
+    inbox.push_back(msg);
     
   }
   int GetInbox(int index){
