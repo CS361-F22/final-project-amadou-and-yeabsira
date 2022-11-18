@@ -37,13 +37,13 @@ public:
 
   std::optional<Organism> CheckReproduction() {
     
-    if (GetPoints() > 20) {
+    if (this->GetPoints() > 20) {
       Organism offspring = *this;
       offspring.Reset();
       offspring.SetSeqID(offspring_id);
       offspring_id++;
       offspring.Mutate();
-      AddPoints(-20);
+      offspring.AddPoints(-20);
       return offspring;
     }
     return {};
