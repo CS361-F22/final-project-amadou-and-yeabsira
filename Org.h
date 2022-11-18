@@ -52,6 +52,10 @@ public:
   void Process(emp::WorldPosition current_location) {
     cpu.state.current_location = current_location;
     cpu.RunCPUStep(10);
+    // if(GetMaxId()==599){
+    //   inbox.clear();
+    // }
+    //AddPoints(0.1);
     //TODO: Run the CPU!
 
   }
@@ -89,7 +93,7 @@ public:
     
   }
   void RecMsg(int msg){
-    inbox.push_back(msg);
+    inbox[0] = msg;
     
   }
   int GetInbox(int index){

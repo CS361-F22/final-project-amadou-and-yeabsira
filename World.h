@@ -12,8 +12,11 @@ class OrgWorld : public emp::World<Organism> {
   std::vector<emp::WorldPosition> reproduce_queue;
   std::vector<Task *> tasks{new Task_1()};
   std::vector<std::string> task_name;
+  int leader;
   int task_index;
-  int highestID = 0;
+  int highestId = 99;
+  int highestIdCount = 0;
+  int nonHighestIdCount = 1;
 
  
   
@@ -60,18 +63,29 @@ public:
   void CheckOutput(float output, OrgState &state) {
       for (Task *task : tasks) {
         emp::Ptr<Organism> currentOrg;
-        srand(task->CheckOutput(output, state.last_inputs));
-        int sent = rand()%100;
+        int output = task->CheckOutput(output, state.last_inputs);
+        srand(output);
+        int sent = rand()%1000;
         currentOrg = initiateMsg(state.Seq_ID, sent);
         if(!currentOrg){continue;}
-        //std::cout << "Sent: " << sent << " - " << "SeqId: " << currentOrg->GetSeqId() << std::endl;
+        if(sent!=highestId){
+          //std::cout << "No: " << nonHighestIdCount <<std::endl;
+          nonHighestIdCount++;
+        }
+        else{
+          std::cout << "Yes: " << highestIdCount <<std::endl;
+          highestIdCount++;
+        }
+
+        //std::cout << "Percent: " << highestIdCount/nonHighestIdCount << std::endl;
+        std::cout << "Max-ID: " << currentOrg->GetMaxId() << std::endl;
         if(sent==currentOrg->GetSeqId()){
-          std::cout << "seq_id" << std::endl;
-          state.points += 0.1;
+          //std::cout << "seq_id" << std::endl;
+          state.points += reward;
         }
         if(sent==currentOrg->GetMaxId()){
-         //std::cout << "max_id" << std::endl;
-         state.points += 0.2;
+         //std::cout << "max_id" << currentOrg->GetMaxId() << std::endl;
+         state.points += reward;
         }
         if(sent!=currentOrg->GetSeqId()){
          //std::cout << "non_id" << std::endl;
@@ -122,17 +136,13 @@ public:
     return new_position.GetIndex();
   }
 
-  // Organism getLeader(){
-  //   emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
-  //   for(int i : schedule) {
-  //     if(!IsOccupied(i)) {continue;}
-  //     if(pop[i]->GetSeqId()==id){
-  //       pop[i]->SetPos(i);
-  //       return pop[i];
-  //     }
-  //   }
-  //   return NULL;
-  // }
+   bool isLeader(){
+    int percentageMax = highestIdCount/nonHighestIdCount;
+    if(percentageMax >= 0.95){
+      return true;
+    }
+    return false;
+  }
 
   
 
