@@ -1,3 +1,4 @@
+
 #include <cmath>
 #include <string>
 
@@ -22,6 +23,5 @@ class Task_1 : public Task {
      }
 
 };
-
 
 
