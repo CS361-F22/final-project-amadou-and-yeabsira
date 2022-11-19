@@ -6,7 +6,6 @@
 #include "Org.h"
 #include <stdlib.h>
 #include <cstdlib>
-#include "emp/data/DataFile.hpp"
 
 class OrgWorld : public emp::World<Organism>
 {
@@ -15,22 +14,18 @@ class OrgWorld : public emp::World<Organism>
   std::vector<Task *> tasks{new Task_1()};
   std::vector<std::string> task_name;
   int leader;
-  int task_index;
+  int cycle = 0;
   int highestId = 99;
-  int highestIdCount = 0;
-  int nonHighestIdCount = 1;
+  int in[4] = {2,2,2,2};
+  double highestIdCount = 0;
+  double nonHighestIdCount = 1;
 
 public:
   float reward;
   int count;
-  emp::Ptr<emp::DataMonitor<int>> data_node_messagesCount; // data node to track messages
   OrgWorld(emp::Random &_random) : emp::World<Organism>(_random), random(_random) {}
 
-  /*
-    Destuctor of data nodes
-  */
-  ~OrgWorld() {if (data_node_messagesCount)
-      data_node_messagesCount.Delete();}
+  ~OrgWorld() {}
 
   const pop_t &GetPopulation() { return pop; }
 
@@ -68,41 +63,20 @@ public:
     }
     reproduce_queue.clear();
   }
-
-  emp::DataMonitor<int>& GetMsgCountDataNode() {
-if(!data_node_messagesCount) {
-    data_node_messagesCount.New();
-    OnUpdate([this](size_t){
-    data_node_messagesCount -> Reset();
-    for (size_t i = 0; i < pop.size(); i++)
-        if(IsOccupied(i))
-        data_node_messagesCount->AddDatum(1); // each organism sends 1 message per update
-    });
-}
-return *data_node_messagesCount;
-}
-
-emp::DataFile & SetupMsgFile(const std::string & filename) {
-    auto & file = SetupFile(filename);
-    auto & node1 = GetMsgCountDataNode();
-    file.AddVar(update, "update", "Update");
-    file.AddTotal(node1, "count", "Total number of messages");
-
-    file.PrintHeaderKeys();
-
-    return file;
-  }
-
   // Check whether the task has been complemted by the organism and assing points based on the result
   void CheckOutput(float output, OrgState &state)
   {
     for (Task *task : tasks)
     {
       emp::Ptr<Organism> currentOrg;
-      int output = task->CheckOutput(output, state.last_inputs);
-      srand(output);
-      int sent = rand() % 1000;
+      double out = task->CheckOutput(output, in);
+      srand(out);
+      int sent = rand() % 100;
       currentOrg = initiateMsg(state.Seq_ID, sent);
+      if (out == 0)
+      {
+        continue;
+      }
       if (!currentOrg)
       {
         continue;
@@ -114,28 +88,35 @@ emp::DataFile & SetupMsgFile(const std::string & filename) {
       }
       else
       {
-        std::cout << "Yes: " << highestIdCount << std::endl;
+        // std::cout << "Yes: " << highestIdCount <<std::endl;
         highestIdCount++;
       }
 
-      // std::cout << "Percent: " << highestIdCount/nonHighestIdCount << std::endl;
-      std::cout << "Max-ID: " << currentOrg->GetMaxId() << std::endl;
+       //std::cout << "sent: " << sent << std::endl;
+      std::cout << "Percent: " << GetPercent() << " - " << nonHighestIdCount << " - " << highestIdCount << std::endl;
+      // std::cout << "Max-ID: " << currentOrg->GetMaxId() << std::endl;
       if (sent == currentOrg->GetSeqId())
       {
-        // std::cout << "seq_id" << std::endl;
+        std::cout << "seq_id" << std::endl;
         state.points += reward;
       }
       if (sent == currentOrg->GetMaxId())
       {
-        // std::cout << "max_id" << currentOrg->GetMaxId() << std::endl;
-        state.points += reward;
-      }
-      if (sent != currentOrg->GetSeqId())
-      {
-        // std::cout << "non_id" << std::endl;
-        state.points -= 0.1;
-      }
+        // std::cout << "max_id" << std::endl;
+        state.points += reward + 1;
+      } 
+      // if(sent!=currentOrg->GetSeqId()){
+      //  //std::cout << "non_id" << std::endl;
+      //  state.points -= reward;
+      // }
     }
+  }
+
+  double GetPercent(){
+  
+     double percent = highestIdCount / nonHighestIdCount;
+     return percent;
+
   }
 
   emp::Ptr<Organism> initiateMsg(int org, int msg)

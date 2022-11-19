@@ -1,4 +1,3 @@
-
 //in web.cpp at the VERY top
 #define UIT_VENDORIZE_EMP
 #define UIT_SUPPRESS_MACRO_INSEEP_WARNINGS
@@ -24,14 +23,13 @@ emp::web::Document settings("settings");
 class Animator : public emp::web::Animate {
     const double num_h_boxes  = 50;
     const double num_w_boxes = 50;
-    const double RECT_SIDE = 10;
+    const double RECT_SIDE = 15;
     const double width{num_w_boxes * RECT_SIDE};
     const double height{num_h_boxes * RECT_SIDE};
 
     emp::web::Canvas canvas{width, height, "canvas"};
     emp::Random random{config.SEED()};
     OrgWorld world{random};
-    
 
 
 
@@ -41,7 +39,7 @@ public:
 //Constructor for the class that sets up the Gui for the animation
 Animator() {  
 
-        world.SetupMsgFile("messages.data").SetTimingRepeat(1);
+       
         auto specs = emp::ArgManager::make_builtin_specs(&config);
         emp::ArgManager am(emp::web::GetUrlParams(), specs);
         am.UseCallbacks();
@@ -55,6 +53,7 @@ Animator() {
         doc << GetStepButton("Step");
 
         random.ResetSeed(config.SEED());
+       
         world.reward = config.Reward();
         world.SetPopStruct_Grid(num_w_boxes, num_h_boxes);
         for(int i = 0;i<config.Population();i++){

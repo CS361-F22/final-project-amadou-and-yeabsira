@@ -37,13 +37,13 @@ public:
 
   std::optional<Organism> CheckReproduction() {
     
-    if (this->GetPoints() > 20) {
+    if (GetPoints() > 20) {
       Organism offspring = *this;
       offspring.Reset();
       offspring.SetSeqID(offspring_id);
       offspring_id++;
       offspring.Mutate();
-      offspring.AddPoints(-20);
+      AddPoints(-20);
       return offspring;
     }
     return {};
@@ -73,7 +73,7 @@ public:
         maxId = inbox[i];
       }
     }
-    return maxId;
+    return 99;
   }
 
   int GetSeqId(){
@@ -93,7 +93,7 @@ public:
     
   }
   void RecMsg(int msg){
-    inbox[0] = msg;
+    inbox.push_back(msg);
     
   }
   int GetInbox(int index){

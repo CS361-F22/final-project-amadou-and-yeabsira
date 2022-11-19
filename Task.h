@@ -1,4 +1,3 @@
-
 #include <cmath>
 #include <string>
 
@@ -12,7 +11,7 @@ public:
 class Task_1 : public Task {
 
    public:
-     double CheckOutput(int output, int inputs[4]) override {   
+     double CheckOutput(int output, int inputs[4]) override {  
           return output;
      }
      public: 
