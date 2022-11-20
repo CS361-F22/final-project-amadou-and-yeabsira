@@ -18,7 +18,9 @@ struct OrgState {
   //How many points this organism has currently
   double points;
   
-  int Seq_ID;
+  int Seq_ID; // Sequential ID of an organism
+
+  int send_self_id_count = 0; //the number of times an organism send their own id
 
   //Needs to know current location for possible reproduction
   emp::WorldPosition current_location;
@@ -28,7 +30,7 @@ struct OrgState {
   */
   void add_input(float input) {
     last_inputs[last_input_idx] = input;
-    last_input_idx = (last_input_idx + 1) % 4;
+    last_input_idx = (last_input_idx + 1) % 4; 
   }
 };
 

@@ -6,6 +6,7 @@
 #include "Org.h"
 #include <stdlib.h>
 #include <cstdlib>
+#include "emp/data/DataFile.hpp"
 
 class OrgWorld : public emp::World<Organism>
 {
@@ -13,21 +14,129 @@ class OrgWorld : public emp::World<Organism>
   std::vector<emp::WorldPosition> reproduce_queue;
   std::vector<Task *> tasks{new Task_1()};
   std::vector<std::string> task_name;
-  int leader;
+  int leader; // leader holder
   int cycle = 0;
-  int highestId = 99;
-  int in[4] = {2,2,2,2};
-  double highestIdCount = 0;
-  double nonHighestIdCount = 1;
+  int highestId = 99; // highest ID in the world, purposefully assigned
+  int in[4] = {2,2,2,2}; // fixed inputs for Tasks instructions
+  
 
 public:
   float reward;
   int count;
+  std::string kill_selfish;
+  double highestIdCount = 0; // holds the # of times highest ID in the world has been sent
+  double nonHighestIdCount = 1; // holds # of times any other ID has been sent (set to 1 to avoid division of 0)
+  int sequentialIDSentCount = 0; /// holds # of times sequential ID has been sent
+  int realIDsSent = 0; // holds # of times realIDs have been sent
+  int totalMessagesCounter = 0; //holds total # of messages sent
+  int orgCount = 0; // Organism counter
+  emp::Ptr<emp::DataMonitor<int>> data_node_totalMsgsCount; // data node of total messages sent
+  emp::Ptr<emp::DataMonitor<int>> data_node_totalSelfIDsSent; // data node of total sequential IDs sent
+  emp::Ptr<emp::DataMonitor<int>> data_node_totalRealIDsSent; // data node of total real IDs sent
+  emp::Ptr<emp::DataMonitor<int>> data_node_totalHighestIDsSent; // data node of # of times highest ID in the world (ID 99) has been sent
   OrgWorld(emp::Random &_random) : emp::World<Organism>(_random), random(_random) {}
 
-  ~OrgWorld() {}
+  ~OrgWorld() { // deletor of data nodes
+    if(data_node_totalMsgsCount) data_node_totalMsgsCount.Delete();
+    if(data_node_totalSelfIDsSent) data_node_totalSelfIDsSent.Delete();
+    if(data_node_totalRealIDsSent) data_node_totalRealIDsSent.Delete();
+    if(data_node_totalHighestIDsSent) data_node_totalHighestIDsSent.Delete();
+    } 
 
   const pop_t &GetPopulation() { return pop; }
+
+  /*
+    Getter of total messages data node
+  */
+  emp::DataMonitor<int>& GetTotalMsgsCountDataNode() {
+    if(!data_node_totalMsgsCount) {
+    data_node_totalMsgsCount.New();
+    OnUpdate([this](size_t){
+      data_node_totalMsgsCount -> Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if(IsOccupied(i))
+        data_node_totalMsgsCount->AddDatum(totalMessagesCounter); // 1 message sent per organism per update
+      }
+    });
+  }
+  return *data_node_totalMsgsCount;
+  }
+
+    /*
+    Getter of total self IDs sent data node
+  */
+  emp::DataMonitor<int>& GetTotalSelfIDsSent() {
+    if(!data_node_totalSelfIDsSent) {
+    data_node_totalSelfIDsSent.New();
+    OnUpdate([this](size_t){
+      data_node_totalSelfIDsSent -> Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if(IsOccupied(i))
+        data_node_totalSelfIDsSent->AddDatum(sequentialIDSentCount); //
+      }
+    });
+  }
+  return *data_node_totalSelfIDsSent;
+  }
+
+
+  /*
+    Getter of total real IDs sent data node
+  */
+  emp::DataMonitor<int>& GetTotalRealIDsSent() {
+    if(!data_node_totalRealIDsSent) {
+    data_node_totalRealIDsSent.New();
+    OnUpdate([this](size_t){
+      data_node_totalRealIDsSent -> Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if(IsOccupied(i))
+        data_node_totalRealIDsSent->AddDatum(realIDsSent); //
+      }
+    });
+  }
+  return *data_node_totalRealIDsSent;
+  }
+
+
+  /*
+    Getter of total real IDs sent data node
+  */
+  emp::DataMonitor<int>& GetTotalHighestIDsSent() {
+    if(!data_node_totalHighestIDsSent) {
+    data_node_totalHighestIDsSent.New();
+    OnUpdate([this](size_t){
+      data_node_totalHighestIDsSent -> Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if(IsOccupied(i))
+        data_node_totalHighestIDsSent->AddDatum(highestIdCount); //
+      }
+    });
+  }
+  return *data_node_totalHighestIDsSent;
+  }
+
+  /*
+    File setter for data nodes
+  */
+  emp::DataFile & SetupAllSends(const std::string & filename) {
+    auto & file = SetupFile(filename);
+    auto & node1 = GetTotalMsgsCountDataNode(); // total # of messages sent
+    auto & node2 = GetTotalSelfIDsSent(); // total # of self-IDs sent
+    auto & node3 = GetTotalRealIDsSent(); // total # of real IDs sent
+    auto & node4 = GetTotalHighestIDsSent(); // total # of highest ID having been sent
+
+
+    file.AddVar(update, "update", "Update");
+    file.AddTotal(node1, "Total Number of Messages Count", "Total number of messages");
+    file.AddTotal(node2, "Total Number of Self IDs sent Count", "Total number of Self IDs sent");
+    file.AddTotal(node3, "Total Number of Real Ids sent Count", "Total number of real IDs sent");
+    file.AddTotal(node4, "Total Number of Highest IDs sent Count", "Total number of Highest IDs sent");
+
+
+    file.PrintHeaderKeys();
+
+    return file;
+  }
 
   void Update()
   {
@@ -43,10 +152,8 @@ public:
         continue;
       }
       pop[i]->Process(i);
+      orgCount++;
     }
-
-    SetPosWorld();
-
     // Time to allow reproduction for any organisms that ran the reproduce instruction
     for (emp::WorldPosition location : reproduce_queue)
     {
@@ -63,6 +170,9 @@ public:
     }
     reproduce_queue.clear();
   }
+
+
+
   // Check whether the task has been complemted by the organism and assing points based on the result
   void CheckOutput(float output, OrgState &state)
   {
@@ -71,7 +181,7 @@ public:
       emp::Ptr<Organism> currentOrg;
       double out = task->CheckOutput(output, in);
       srand(out);
-      int sent = rand() % 100;
+      int sent = rand() % 100; // modulo created to limit the IDs to a certain treshold
       currentOrg = initiateMsg(state.Seq_ID, sent);
       if (out == 0)
       {
@@ -81,44 +191,56 @@ public:
       {
         continue;
       }
-      if (sent != highestId)
+      if (sent != highestId) // if message sent is not the highest ID
       {
-        // std::cout << "No: " << nonHighestIdCount <<std::endl;
         nonHighestIdCount++;
+        totalMessagesCounter++;
       }
       else
       {
-        // std::cout << "Yes: " << highestIdCount <<std::endl;
         highestIdCount++;
+        totalMessagesCounter++;
       }
 
-       //std::cout << "sent: " << sent << std::endl;
-      std::cout << "Percent: " << GetPercent() << " - " << nonHighestIdCount << " - " << highestIdCount << std::endl;
-      // std::cout << "Max-ID: " << currentOrg->GetMaxId() << std::endl;
-      if (sent == currentOrg->GetSeqId())
+      std::cout << "Percent: " << GetPercent() << " - Messages that are not the highest ID " << nonHighestIdCount << " - Messages that are the highest ID " << highestIdCount << std::endl; // print statement for native.cpp
+      if (sent == currentOrg->GetSeqId()) // if message sent is the sequential ID, reward
       {
-        std::cout << "seq_id" << std::endl;
         state.points += reward;
+        sequentialIDSentCount++;
       }
-      if (sent == currentOrg->GetMaxId())
+      if (sent == currentOrg->GetHighestID()) // if message sent is the highest ID in the inbox, reward more
       {
-        // std::cout << "max_id" << std::endl;
-        state.points += reward + 1;
+        state.points+= reward+1;
+      }
+      if (sent == currentOrg->GetMaxId()) // if message sent is the set highest ID in the world (99), reward even more
+      {
+        state.points += reward + 2;
+      }
+      if (sent > orgCount) { // if it's a nonexistent ID (which could be 2500 given dimensions), punish
+        state.points -= reward;
+      }
+      if (sent < orgCount) { // a real ID has been sent
+        realIDsSent++;
       } 
-      // if(sent!=currentOrg->GetSeqId()){
-      //  //std::cout << "non_id" << std::endl;
-      //  state.points -= reward;
+      // if(kill_selfish=="1"){
+      //   killSelfish(currentOrg);
       // }
     }
   }
 
+  /*
+    Returns percentage of highest ID in organisms' inboxes
+  */
   double GetPercent(){
   
-     double percent = highestIdCount / nonHighestIdCount;
+     double percent = (highestIdCount / nonHighestIdCount) * 100;
      return percent;
 
   }
 
+  /*
+    Method used by organisms to send messages in the world
+  */
   emp::Ptr<Organism> initiateMsg(int org, int msg)
   {
 
@@ -133,19 +255,10 @@ public:
     return NULL;
   }
 
-  void SetPosWorld()
-  {
-    emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
-    for (int i : schedule)
-    {
-      if (!IsOccupied(i))
-      {
-        continue;
-      }
-      pop[i]->SetPos(i);
-    }
-  }
 
+  /*
+    Method that returns a specific organism given a sequential ID
+  */
   emp::Ptr<Organism> getOrgByID(int id)
   {
     emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
@@ -164,12 +277,28 @@ public:
     return NULL;
   }
 
+  /*
+    Method that applies the GetRandomNeighbor of organims and determines the facing of messages on our floor
+  */
   int getFacing(int pos)
   {
     emp::WorldPosition new_position = GetRandomNeighborPos(pos);
     return new_position.GetIndex();
   }
 
+  /*
+    Method that eliminates organisms that send their own IDs more than 80 times
+  */
+  void killSelfish(emp::Ptr<Organism> organism){
+    std::cout << "selfish-count: " << organism->GetSendSelfId() << std::endl;
+    if(organism->GetSendSelfId()>80){
+      organism=nullptr;
+    }
+  }
+
+  /*
+    Method to determine if an organism has become a leader
+  */
   bool isLeader()
   {
     int percentageMax = highestIdCount / nonHighestIdCount;
@@ -180,15 +309,6 @@ public:
     return false;
   }
 
-  // returns the task name of the solved task
-  std::string GetTask(int i)
-  {
-    return task_name[i];
-  }
-  void resetTask(int i)
-  {
-    task_name[i] = "";
-  }
   void ReproduceOrg(emp::WorldPosition location)
   {
     // Wait until after all organisms have been processed to perform
@@ -197,21 +317,6 @@ public:
     // organism
     reproduce_queue.push_back(location);
   }
-
-  //   int getDemeIndex(int x, int y){
-  //     std::vector<std::vector<int>> cells;
-  //     cells.resize(100, std::vector<int>(100, 0));
-  //     for(int m = 0;m<10;m++){
-  //       for(int k = 0;k<10;k++){
-  //         for(int i = 0;i<6;i++){
-  //           for(int j = 0;j<6;j++){
-  //             cells[i+(6*m)][(j+(6*k))] = k+1;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return cells[x][y];
-  //  }
 };
 
 #endif

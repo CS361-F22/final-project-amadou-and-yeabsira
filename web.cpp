@@ -36,8 +36,7 @@ class Animator : public emp::web::Animate {
 
 public:
 
-
-//Constructor for the class that sets up the Gui for the animation
+//Constructor for the class that sets up the GUI for the animation
 Animator() {  
 
        
@@ -46,7 +45,7 @@ Animator() {
         am.UseCallbacks();
         if (am.HasUnused()) std::exit(EXIT_FAILURE);
         emp::prefab::ConfigPanel config_panel(config);
-        config_panel.SetRange("Population", "1", "100");
+        config_panel.SetRange("Population", "70", "200");
         settings << config_panel;
 
         doc << canvas;
@@ -61,28 +60,31 @@ Animator() {
          Organism* new_org1 = new Organism(&world,i, 1);
          world.Inject(*new_org1);
         }
-
-        world.Resize(num_w_boxes, num_h_boxes);
-        //std::cout << getFacing(5) << std::endl;
-
-        
+        world.Resize(num_w_boxes, num_h_boxes);        
+        emp::prefab::ToggleSwitch kill_selfish{
+         [&](std::string val){
+            world.kill_selfish = val;
+         },
+         "Kill Selfish Organisms",
+         false
+         };
+         doc << "<br>";
+         doc << "<br>";
+         doc << kill_selfish;
 }
-
-
-
 
 void DoFrame() override {
         canvas.Clear();
         world.Update();
         int org_num = 0;
-        org_num = 0;
-        
         for (int x = 0; x < num_h_boxes;x++ ){
               for (int y = 0; y < num_w_boxes;y++){
                 if (world.IsOccupied(org_num)) {
                     Organism organism = world.GetOrg(org_num);
-                    //std::cout << "Id: " << organism.GetSeqId() << std::endl;
                       canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "purple", "black");
+                      if(organism.GetSeqId()==organism.GetMaxId()){
+                        canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "red", "black");
+                      }
                 }
                 else {
                     canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "white", "black");
