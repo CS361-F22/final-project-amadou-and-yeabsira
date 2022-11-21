@@ -24,10 +24,10 @@ emp::web::Document settings("settings");
 class Animator : public emp::web::Animate {
     const double num_h_boxes  = 50;
     const double num_w_boxes = 50;
-    const double RECT_SIDE = 15;
+    const double RECT_SIDE = 10;
     const double width{num_w_boxes * RECT_SIDE};
     const double height{num_h_boxes * RECT_SIDE};
-
+    bool toggleEntered = false; // GUI expansion, lets user know what the red organisms mean
     emp::web::Canvas canvas{width, height, "canvas"};
     emp::Random random{config.SEED()};
     OrgWorld world{random};
@@ -53,7 +53,6 @@ Animator() {
         doc << canvas;
         doc << GetToggleButton("Toggle");
         doc << GetStepButton("Step");
-
         random.ResetSeed(config.SEED());
        
         world.reward = config.Reward();
@@ -86,6 +85,10 @@ void DoFrame() override {
                       canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "purple", "black");
                       if(organism.GetSeqId()==organism.GetMaxId()){
                         canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "red", "black");
+                        if (!toggleEntered) {
+                            doc << "The organisms that you now see in red are sending the highest ID in the world, woo!!";
+                            toggleEntered = true;
+                        }
                       }
                 }
                 else {

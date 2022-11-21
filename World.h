@@ -291,7 +291,7 @@ public:
   */
   void killSelfish(emp::Ptr<Organism> organism){
     std::cout << "selfish-count: " << organism->GetSendSelfId() << std::endl;
-    if(organism->GetSendSelfId()>80){
+    if(organism->GetSendSelfId()>80 && organism->GetSeqId() != 99){ // making sure that we do not eliminate the leader
       organism=nullptr;
     }
   }

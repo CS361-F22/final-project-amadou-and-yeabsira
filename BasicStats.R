@@ -8,21 +8,26 @@ require(scales)
 colors <- c("#673F03", "#B50142","#AB08FF","#7B1DFF", "#5731FD","#5E8EFF", "#4755FF" ,"#6FC4FE", "#86E9FE", "#96FFF7", "#B2FCE3", "#BBFFDB", "#D4FFDD", "#EFFDF0")
 
 #Set your working directory
-# TODO: Change PATH_TO_YOUR_FOLDER
 setwd("/Users/amadoutoure/Documents/Carleton/Fall 2022/Artifical Life and Digital Evolution/Assignment Librairies/final-project-amadou-and-yeabsira/")
 
 #You can have whatever variables you want like this
 pop_cap <- 10000
 
 #Read in your data
-initial_data <- read.csv("example.csv", h=T)
+initial_data <- read.csv("AllMsgsSent.csv")
 
 #You can add extra columns with calculations with cbind
-initial_data <-cbind(initial_data, hist_0_prop=initial_data$hist_0/initial_data$count, Treatment=as.factor(initial_data$treatment))
+#initial_data <-cbind(initial_data, hist_0_prop=initial_data$hist_0/initial_data$count, Treatment=as.factor(initial_data$treatment))
 
-plot (initial_data$count,initial_data$update)
+plot (initial_data$update,initial_data$Total.Number.of.Messages.Count)
 
-plot(initial_data$count,initial_data$update, type="l", col="green", lwd=5, xlab="Updates", ylab="Count", main="Updates vs. Total Messages Sent")
+plot(initial_data$update,initial_data$Total.Number.of.Messages.Count, type="b", col="green", lwd=5, pch=15,xlab="Updates", ylab="Total Number of Messages", ylim=range(initial_data$Total.Number.of.Messages.Count,initial_data$Total.Number.of.Self.IDs.sent.Count, initial_data$Total.Number.of.Real.Ids.sent.Count, initial_data$Total.Number.of.Highest.IDs.sent.Count))
+lines (initial_data$update, initial_data$Total.Number.of.Self.IDs.sent.Count, col="red", lwd=5, pch=15)
+lines (initial_data$update, initial_data$Total.Number.of.Real.Ids.sent.Count, col="blue", lwd=5, pch=15)
+lines (initial_data$update, initial_data$Total.Number.of.Highest.IDs.sent.Count, col="black", lwd=5, pch=15)
+title("Updates vs. Different Types of Messages")
+legend (0,2.8,c("Total # of messages sent", "Total # of self IDs sent", "Total # of real IDs sent", "Total # of highest IDs sent"), lwd=c(5,2,5,2), col=c("green","red","blue","black"), pch=c(15,19,15,19),y.intersp=1.5)
+
 
 
 #You can get just a portion of your data with subset
