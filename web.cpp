@@ -46,6 +46,8 @@ Animator() {
         if (am.HasUnused()) std::exit(EXIT_FAILURE);
         emp::prefab::ConfigPanel config_panel(config);
         config_panel.SetRange("Population", "70", "200");
+        config_panel.SetRange("MUTATION_RATE_NUM","0.02","1");
+
         settings << config_panel;
 
         doc << canvas;
@@ -75,7 +77,7 @@ Animator() {
 
 void DoFrame() override {
         canvas.Clear();
-        world.Update();
+        world.Update(config.MUTATION_RATE_NUM());
         int org_num = 0;
         for (int x = 0; x < num_h_boxes;x++ ){
               for (int y = 0; y < num_w_boxes;y++){

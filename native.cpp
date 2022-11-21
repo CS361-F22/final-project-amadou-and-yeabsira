@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
   }
   world.Resize(10,10);
   world.SetupAllSends("AllMsgsSent.csv").SetTimingRepeat(100); // creating file for all nodes needed for data plot
-  for (int update=0; update<50000; update++) { // 50000 updates, matching paper results #1
+  for (int update=0; update<100000; update++) { // 100000 updates being performed for data plot, attempt to replicate paper's results
     world.Update();
   }
 }

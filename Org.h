@@ -31,21 +31,21 @@ public:
     cpu.Reset();
   }
 
-  void Mutate() {
-    cpu.Mutate();
+  void Mutate(double mutationPercent) {
+    cpu.Mutate(mutationPercent);
   }
 
   /*
     Method created to check every organism at each update and see if they shall reproduce
   */
-  std::optional<Organism> CheckReproduction() {
+  std::optional<Organism> CheckReproduction(double mutationPercent) {
     
     if (GetPoints() > 20) {
       Organism offspring = *this;
       offspring.Reset();
       offspring.SetSeqID(offspring_id);
       offspring_id++;
-      offspring.Mutate();
+      offspring.Mutate(mutationPercent);
       AddPoints(-20); // reverting offspring's point back to 0
       return offspring;
     }
@@ -54,7 +54,7 @@ public:
 
   void Process(emp::WorldPosition current_location) {
     cpu.state.current_location = current_location;
-    cpu.RunCPUStep(10);
+    cpu.RunCPUStep(30);
   }
 
   void PrintGenome() {

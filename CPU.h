@@ -80,8 +80,8 @@ public:
    *
    * Purpose: Mutates the genome code stored in the CPU.
    */
-  void Mutate() {
-   program.ApplyPointMutations(0.02);
+  void Mutate(double mutationPercent) {
+   program.ApplyPointMutations(mutationPercent);
    //0.02 is percent probability that each bit
    // in the binary representation of the genome is flipped
   InitializeState();

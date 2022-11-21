@@ -138,7 +138,7 @@ public:
     return file;
   }
 
-  void Update()
+  void Update(double mutationPercent)
   {
 
     emp::World<Organism>::Update();
@@ -162,7 +162,7 @@ public:
         return;
       }
       std::optional<Organism> offspring =
-          pop[location.GetIndex()]->CheckReproduction();
+          pop[location.GetIndex()]->CheckReproduction(mutationPercent);
       if (offspring.has_value())
       {
         DoBirth(offspring.value(), location.GetIndex());
