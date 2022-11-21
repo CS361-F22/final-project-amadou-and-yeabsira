@@ -297,7 +297,7 @@ public:
   }
 
   /*
-    Method to determine if an organism has become a leader
+    Method to determine if a leader has been elected
   */
   bool isLeader()
   {

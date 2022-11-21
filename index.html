@@ -16,7 +16,10 @@
     <script type="text/javascript" src="de_web.js"></script>
     
 </head>
+<meta name="Leader Selection" content="width=device-width, initial-scale=1.0">
 <body>
+    <h3 style="color:darkblue;"><i>Leader Selection Program, by Yeabsira Gebreegziabher and Amadou Toure</i></h3>
+    <p>Welcome! This program is attempting to replicate the results explained in this folder's 'Replication Report.pdf'. The organims here each perform and receive points based on messages that they are sending to each other, which can either be their own, another organism's, or a non-existing ID. They are rewarded for sending their own, one higher than theirs, or the highest in the world (ID 99), and are punished for sending non-existent ones. The overall goal will be to see whether or not, after 100000 updates, 95% of all the messages will be the highest in the world (ID 99), indicating that a leader has been selected (that being ID 99). Press 'Start' to run to program indefinitely (or until your CPU gives up, who knows ;) ) or 'Step' to run to program update by update. Enjoy!</p>
     <div class="container">
         <div class="row">
             <div class="col">
@@ -27,5 +30,6 @@
             </div>
         </div>
     </div>
+    <p>Things you should try: (1) Change the number of the population to have more organisms. (2) Change the reward to give more points to well-performing organisms / less points to less-performing organisms. (3) Change the mutation rate of organisms. (4) Switch the Kill selfish toggle to kill organisms that send too many of their own IDs (no need to reload with changes when switching this)</p>
 </body>
   
