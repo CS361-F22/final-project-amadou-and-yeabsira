@@ -23,9 +23,9 @@ int main(int argc, char *argv[])
     world.Inject(*new_org);
   }
   world.Resize(10,10);
+  world.kill_selfish = false; //toggled kill_selfish to true for plotted results. 
   world.SetupAllSends("AllMsgsSent_Ext.csv").SetTimingRepeat(100); // creating file for all nodes needed for data plot
-  world.kill_selfish = true; //toggled kill_selfish to true for plotted results. 
   for (int update=0; update<100000; update++) { // 100000 updates being performed for data plot, attempt to replicate paper's results
-    world.Update();
+    world.Update(0.02);
   }
 }

@@ -72,6 +72,9 @@ Animator() {
          doc << "<br>";
          doc << "<br>";
          doc << kill_selfish;
+         // TODO --> Fix the placement of the text that tells the user what the red organisms are (code is in the do frame method).
+         // TODO --> Give quick explanation of what the user should try with the configurations and the toggle switch.
+         // TODO --> Give user a quick explanation of what they are seeing.
 }
 
 void DoFrame() override {
@@ -86,7 +89,7 @@ void DoFrame() override {
                       if(organism.GetSeqId()==organism.GetMaxId()){
                         canvas.Rect(x * RECT_SIDE, y * RECT_SIDE, RECT_SIDE, RECT_SIDE, "red", "black");
                         if (!toggleEntered) {
-                            doc << "The organisms that you now see in red are sending the highest ID in the world, woo!!";
+                            doc << "\nThe organisms that you now see in red are sending the highest ID in the world, woo!!";
                             toggleEntered = true;
                         }
                       }
